@@ -1,5 +1,6 @@
 local M = {}
 local map = vim.keymap.set
+local _, fzf = pcall(require, "fzf-lua")
 
 -- export on_attach & capabilities
 M.on_attach = function(client, bufnr)
@@ -7,9 +8,12 @@ M.on_attach = function(client, bufnr)
     return { buffer = bufnr, desc = "LSP " .. desc }
   end
 
-  map("n", "gD", vim.lsp.buf.declaration, opts "Go to declaration")
-  map("n", "gd", vim.lsp.buf.definition, opts "Go to definition")
-  map("n", "gi", vim.lsp.buf.implementation, opts "Go to implementation")
+  -- map("n", "gD", vim.lsp.buf.declaration, opts "Go to declaration")
+  -- map("n", "gd", vim.lsp.buf.definition, opts "Go to definition")
+  -- map("n", "gi", vim.lsp.buf.implementation, opts "Go to implementation")
+  map("n", "gD", fzf.lsp_declarations, opts "Go to declaration")
+  map("n", "gd", fzf.lsp_definitions, opts "Go to definition")
+  map("n", "gi", fzf.lsp_implementations, opts "Go to implementation")
   map("n", "<leader>sh", vim.lsp.buf.signature_help, opts "Show signature help")
   map("n", "<leader>wa", vim.lsp.buf.add_workspace_folder, opts "Add workspace folder")
   map("n", "<leader>wr", vim.lsp.buf.remove_workspace_folder, opts "Remove workspace folder")
@@ -18,12 +22,16 @@ M.on_attach = function(client, bufnr)
     print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
   end, opts "List workspace folders")
 
-  map("n", "<leader>D", vim.lsp.buf.type_definition, opts "Go to type definition")
-  map("n", "<leader>ra", require "nvchad.lsp.renamer", opts "NvRenamer")
+  -- map("n", "<leader>D", vim.lsp.buf.type_definition, opts "Go to type definition")
+  map("n", "<leader>D", fzf.lsp_typedefs, opts "Go to type definition")
+  map("n", "<leader>rn", require "nvchad.lsp.renamer", opts "NvRenamer")
 
   map({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts "Code action")
-  map("n", "gr", vim.lsp.buf.references, opts "Show references")
-  map("n", "<leader>ds", require("telescope.builtin").lsp_document_symbols, opts "[D]ocument [S]ymbols")
+  -- map("n", "gr", vim.lsp.buf.references, opts "Show references")
+  map("n", "gr", fzf.lsp_references, opts "Show references")
+  -- map("n", "<leader>ds", require("telescope.builtin").lsp_document_symbols, opts "[D]ocument [S]ymbols")
+  map("n", "<leader>ds", fzf.lsp_document_symbols, opts "[D]ocument [S]ymbols")
+  map("n", "<leader>ws", fzf.lsp_workspace_symbols, opts "[D]ocument [S]ymbols")
 
   if client and client.server_capabilities.inlayHintProvider and vim.lsp.inlay_hint then
     map("n", "<leader>th", function()
@@ -58,6 +66,18 @@ M.capabilities.textDocument.completion.completionItem = {
     },
   },
 }
+
+
+local cmp_capabilities = {}
+local success, cmp = pcall(require, 'blink.cmp')
+
+if success then
+  -- If 'blink.cmp' is available, get the LSP capabilities
+  cmp_capabilities = cmp.get_lsp_capabilities() or {}
+end
+
+M.capabilities = vim.tbl_extend('force', M.capabilities, cmp_capabilities or {})
+
 
 M.defaults = function()
   dofile(vim.g.base46_cache .. "lsp")

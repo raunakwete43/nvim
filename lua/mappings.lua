@@ -2,6 +2,7 @@ vim.opt.hlsearch = true
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 local map = vim.keymap.set
+local _, fzf = pcall(require, 'fzf-lua')
 -- Diagnostic keymaps
 map('n', '[d', vim.diagnostic.goto_prev, { desc = 'Go to previous [D]iagnostic message' })
 map('n', ']d', vim.diagnostic.goto_next, { desc = 'Go to next [D]iagnostic message' })
@@ -39,7 +40,11 @@ end, { desc = "general format file" })
 
 -- global lsp mappings
 map("n", "<leader>dl", vim.diagnostic.setloclist, { desc = "LSP diagnostic loclist" })
-map("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
+-- map("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic [Q]uickfix list" })
+map("n", "<leader>q", fzf.diagnostics_document, { desc = "Open diagnostic [Q]uickfix list" })
+map("n", "<leader>wq", fzf.diagnostics_workspace, { desc = "[W]orkspace Diagnostics" })
+map("n", "<leader>wg", fzf.lsp_live_workspace_symbols, { desc = "[W]orkspace [G]rep Symbols" })
+
 map("n", "[d", vim.diagnostic.goto_prev, { desc = "Go to previous [D]iagnostic message" })
 map("n", "]d", vim.diagnostic.goto_next, { desc = "Go to next [D]iagnostic message" })
 
